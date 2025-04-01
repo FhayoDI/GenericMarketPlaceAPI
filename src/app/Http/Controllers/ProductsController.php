@@ -8,41 +8,33 @@ use App\Models\Products;
 
 class ProductsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return Products::all();
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create() {}
+    public function store(StoreProductsRequest $request, Products $products)
     {
-        //
+        $request->validated([
+            "category_name" => "required|string",
+            "category_id" => "required|integer",
+            "name" => "required|string",
+            "stock" => "required|integer",
+            "price" => "required|float",
+            "description" => "nullable|string",
+        ]);
+        $products = Products::create($request->all());
+        return response()->json([
+            "message" => "Criado com sucesso!",
+            "product" => $products,
+        ], 201);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreProductsRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Products $products)
     {
-        //
+        return response()->json([
+            "product" => $products,
+        ]);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Products $products)
     {
         //
@@ -53,14 +45,28 @@ class ProductsController extends Controller
      */
     public function update(UpdateProductsRequest $request, Products $products)
     {
-        //
+        $request->validated([
+            "category_name",
+            "category_id",
+            "name",
+            "stock",
+            "price",
+            "description",
+        ]);
+        $products = Products::update($request->all());
+        return $products;
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Products $products)
+    public function destroy(Products $products,$id)
     {
-        //
+        $products = Products::find($id);
+        if (!$products) {
+            return response()->json([
+                "message" => "Produto não encontrado!",
+            ], 404);
+        }
+        $products->delete();
+        return response()->json([
+            "message" => "Produto deletado com sucesso!",
+        ], 204);
     }
 }

@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class UserAdress extends Model
+class Historic extends Model
 {
     use HasFactory;
-    protected $fillable = [ 
+
+    public $fillable = [
+        "user_id",
         "street",
         "number",
         "cep",
@@ -18,13 +20,8 @@ class UserAdress extends Model
         "state",
         "country",
     ];
-    protected function userAdress(): BelongsTo
+    protected function userHistoric():BelongsTo
     {
-        return $this->belongsTo(related: User::class);
-    }  
-    protected function adressHistoric():HasMany
-    {
-        return $this->hasMany(Historic::class);
+        return $this->belongsTo(UserAdress::class);
     }
-
 }
