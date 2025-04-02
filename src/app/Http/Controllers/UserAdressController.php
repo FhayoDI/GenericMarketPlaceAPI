@@ -8,16 +8,19 @@ use App\Models\User;
 use App\Models\UserAdress;
 use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserAdressController extends Controller
 {
     public function index()
     {
-        return UserAdress::all();
+        $user = auth()->user();
+        return UserAdress::all()->where("user_id",$user->id,);
     }
-    public function adress(Store $store,Request $request)
+    public function adress(Request $request)
     {
-        $request->validate([
+        
+        $validated = $request->validate([
             "street"=>"required|string",
             "number"=>"required|integer",
             "cep"=>"required|integer",
@@ -25,20 +28,19 @@ class UserAdressController extends Controller
             "state"=>"required|string",
             "country"=>"required|string",
         ]);
-        $adress = UserAdress::create($request->all());
+
+        $validated['user_id'] = Auth::id();
+
+        $adress = UserAdress::create($validated);
         return response($adress,201);
     }
 
-    public function show(UserAdress $userAdress,User $user)
+
+    public function update(UpdateUserAdressRequest $request, UserAdress $userAdress)
     {
-        return response()->json([
-            "usuario:"=>$user,
-            "endereço:"=>$userAdress,
-        ]);
-    }
-    public function update(UpdateUserAdressRequest $request, UserAdress $userAdress,User $user)
-    {
-        $newAdress = $request->validate([
+        $user = auth()->user();
+
+        $request->validate([
         "street"=>"required|string",
         "number"=>"required|integer",
         "cep"=>"required|integer",
@@ -46,35 +48,28 @@ class UserAdressController extends Controller
         "state"=>"required|string",
         "country"=>"required|string",
         ]);
-        $userAdress->update($newAdress);
-        return response()->json([
-            "User"=>$user,
-            "userAdress:"=>$userAdress,
-        ]);
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(UserAdress $userAdress)
-    {
-        $userAdress->delete();
-    }
-    public function addHistoric(UserAdress $userAdress,Request $request)
-    {
-        $request->validate([
-            'street',
-            'number',
-            'cep',
-            'city',
-            'state',
-            'country',
-        ]);  
-        $historic = Historic::create($request->all());
+        $adress = UserAdress::where('user_id',$user->id,)->first();
+        if (!$adress){
+            return response()->json([
+                "message" =>"Não foi possível atualizar o endereço!"
+            ],404);
+        }
+        $adress->update($request->only(["street",
+        "number",
+        "cep",
+        "city",
+        "state",
+        "country",]));
         return response()->json([
-            "historic"=>$historic,
+            "message" =>"Endereço atualizado com sucesso!"
         ]);
         
+        
     }
+    public function destroy(UserAdress $userAdress)
+    {
 
+        $userAdress->delete();
+    }
 }

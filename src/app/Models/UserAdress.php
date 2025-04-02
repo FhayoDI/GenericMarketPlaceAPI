@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class UserAdress extends Model
 {
     use HasFactory;
-    protected $fillable = [ 
+    public $fillable = [ 
+        "user_id",
         "street",
         "number",
         "cep",
@@ -18,13 +19,13 @@ class UserAdress extends Model
         "state",
         "country",
     ];
-    protected function userAdress(): BelongsTo
+    public function userAdress(): BelongsTo
     {
         return $this->belongsTo(related: User::class);
     }  
-    protected function adressHistoric():HasMany
+    public function order():HasMany
     {
-        return $this->hasMany(Historic::class);
+        return $this->hasMany(Order::class);
     }
 
 }

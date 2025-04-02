@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserAdressController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
@@ -22,12 +23,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 //login e registro
-Route::post('/registro',[UserController::class,'registration']);
-Route::post('/login',[UserController::class,'login']);
-Route::post('/logout',[UserController::class,'logout']);
+Route::post('/registro', [LoginController::class, 'registration']);
+Route::post('/login', [LoginController::class, 'login']);
 
-//endereços
-Route::middleware('auth:sanctum')->group(function (){
-    Route::get('/user/adress/all',[UserAdressController::class,'index']);
-        
-});
+Route::middleware('auth:sanctum')->group(
+    function () {
+        //logout
+        Route::post('/logout', [LoginController::class, 'logout']);
+        //endereços
+        Route::post('/user/adress', [UserAdressController::class, 'adress']);
+        Route::get('/user/adress', [UserAdressController::class, 'index']);
+        Route::patch('/user/adress/update', [UserAdressController::class, 'update']);
+        Route::put('/user/adress/delete', [UserAdressController::class, 'destroy']);
+        Route::get('/user/adress/historico',[UserAdressController::class,'showHistoric']);
+    }
+);
