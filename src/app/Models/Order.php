@@ -29,6 +29,10 @@ class Order extends Model
     }
     public function coupon()
     {
-        return $this->belongsTo(Order::class);
+        return $this->hasOne(Coupon::class);
+    }
+    public function orderItems()
+    {
+        return $this->hasMany(Orderitem::class);
     }
 }

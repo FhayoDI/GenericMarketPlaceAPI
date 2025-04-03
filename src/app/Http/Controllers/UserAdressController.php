@@ -64,12 +64,5 @@ class UserAdressController extends Controller
         return response()->json([
             "message" =>"Endereço atualizado com sucesso!"
         ]);
-        
-        
-    }
-    public function destroy(UserAdress $userAdress)
-    {
-
-        $userAdress->delete();
     }
 }

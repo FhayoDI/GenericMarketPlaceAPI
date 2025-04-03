@@ -19,7 +19,7 @@ class UserAdress extends Model
         "state",
         "country",
     ];
-    public function userAdress(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(related: User::class);
     }  

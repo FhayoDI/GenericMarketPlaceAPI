@@ -16,8 +16,19 @@ class Products extends Model
         "stock",
         "price",
         "description",
-    ];
+    ];  
     public function category(): BelongsTo{
-        return $this->belongsTo(Products::class);
+        return $this->belongsTo(Category::class);
+    }
+    public function order(){
+        return $this->hasMany(Order::class);
+    }
+    public function discount() 
+    {
+        return $this->hasMany(Discounts::class); 
+    }
+    public function cartItem()
+    {
+        return $this->hasMany(CartItem::class);
     }
 }
