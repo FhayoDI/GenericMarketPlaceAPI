@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductsRequest;
 use App\Http\Requests\UpdateProductsRequest;
+use App\Models\Category;
 use App\Models\Products;
+use App\Models\User;
 
 class ProductsController extends Controller
 {
@@ -12,10 +14,9 @@ class ProductsController extends Controller
     {
         return Products::all();
     }
-    public function create() {}
-    public function store(StoreProductsRequest $request, Products $products)
+        public function store(StoreProductsRequest $request, Products $products)
     {
-        $request->validated([
+        $userDataValidation = $request->validated([
             "category_name" => "required|string",
             "category_id" => "required|integer",
             "name" => "required|string",
@@ -23,7 +24,7 @@ class ProductsController extends Controller
             "price" => "required|float",
             "description" => "nullable|string",
         ]);
-        $products = Products::create($request->all());
+        $products = Products::create($request->all($userDataValidation));
         return response()->json([
             "message" => "Criado com sucesso!",
             "product" => $products,
@@ -35,35 +36,22 @@ class ProductsController extends Controller
             "product" => $products,
         ]);
     }
-    public function edit(Products $products)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateProductsRequest $request, Products $products)
     {
-        $request->validated([
-            "category_name",
-            "category_id",
-            "name",
-            "stock",
-            "price",
-            "description",
-        ]);
-        $products = Products::update($request->all());
-        return $products;
-    }
-    public function destroy(Products $products,$id)
-    {
-        $products = Products::find($id);
-        if (!$products) {
+        $userDataValidation = $request->validated();
+        if (!Category::find($userDataValidation["category_id"])){
             return response()->json([
-                "message" => "Produto não encontrado!",
-            ], 404);
+                "message" => "Categoria não encontrada!",
+            ],404);
         }
+        $products->update($userDataValidation);
+        return response()->json([
+            "message"=> "Produto atualizado com sucesso!",
+            "product"=>$products,
+        ]);
+    }
+    public function destroy(Products $products)
+{
         $products->delete();
         return response()->json([
             "message" => "Produto deletado com sucesso!",

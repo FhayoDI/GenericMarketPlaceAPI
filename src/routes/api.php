@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserAdressController;
 use App\Http\Controllers\UserController;
@@ -28,6 +29,8 @@ Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(
     function () {
+        //USUARIO
+
         //logout
         Route::post('/logout', [LoginController::class, 'logout']);
         //endereços
@@ -36,5 +39,18 @@ Route::middleware('auth:sanctum')->group(
         Route::patch('/user/adress/update', [UserAdressController::class, 'update']);
         Route::put('/user/adress/delete', [UserAdressController::class, 'destroy']);
         Route::get('/user/adress/historico',[UserAdressController::class,'showHistoric']);
+        //Categorias
+        Route::get('/categorias',[CategoryController::class, 'index']);
+        Route::post('/categorias/nova',[CategoryController::class, 'store']);
+        //Produtos
+
+        //Carrinho
+
+        //Pedidos
+
+        //Desconto
+
+        //Cupom
+
     }
 );

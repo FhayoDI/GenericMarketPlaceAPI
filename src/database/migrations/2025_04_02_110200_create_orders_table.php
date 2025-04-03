@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('adress_id')->constrained("adresses")->onDelete('restrict');
+            $table->foreignId('adress_id')->constrained("user_adresses")->onDelete('restrict');
             $table->dateTime('orderDate');
             $table->foreignId('coupon_id')->nullable()->constrained('coupons')->onDelete('set null');
             $table->enum('status',['PENDING','PROCESSING','SHIPPED','COMPLETED','CANCELED'])->default('PENDING');
