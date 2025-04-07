@@ -10,7 +10,6 @@ class Products extends Model
 {
     use HasFactory;
     public $fillable = [
-        "category_name",
         "category_id",
         "name",
         "stock",
@@ -30,5 +29,8 @@ class Products extends Model
     public function cartItem()
     {
         return $this->hasMany(CartItem::class);
+    }
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 }

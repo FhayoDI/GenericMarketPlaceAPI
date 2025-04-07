@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateUserAdressRequest;
-use App\Models\Historic;
-use App\Models\User;
 use App\Models\UserAdress;
-use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,24 +12,24 @@ class UserAdressController extends Controller
     public function index()
     {
         $user = auth()->user();
-        return UserAdress::all()->where("user_id",$user->id,);
+        return UserAdress::all()->where("user_id", $user->id,);
     }
     public function adress(Request $request)
     {
-        
         $validated = $request->validate([
-            "street"=>"required|string",
-            "number"=>"required|integer",
-            "cep"=>"required|integer",
-            "city"=>"required|string",
-            "state"=>"required|string",
-            "country"=>"required|string",
+            "street" => "required|string",
+            "number" => "required|integer",
+            "cep" => ["required", "string", "regex:/^\d{8}$/"],
+            "city" => "required|string",
+            "state" => "required|string",
+            "country" => "required|string",
         ]);
 
         $validated['user_id'] = Auth::id();
 
         $adress = UserAdress::create($validated);
-        return response($adress,201);
+
+        return response($adress, 201);
     }
 
 
@@ -41,28 +38,30 @@ class UserAdressController extends Controller
         $user = auth()->user();
 
         $request->validate([
-        "street"=>"required|string",
-        "number"=>"required|integer",
-        "cep"=>"required|integer",
-        "city"=>"required|string",
-        "state"=>"required|string",
-        "country"=>"required|string",
+            "street" => "required|string",
+            "number" => "required|integer",
+            "cep" => "required|integer",
+            "city" => "required|string",
+            "state" => "required|string",
+            "country" => "required|string",
         ]);
 
-        $adress = UserAdress::where('user_id',$user->id,)->first();
-        if (!$adress){
+        $adress = UserAdress::where('user_id', $user->id,)->first();
+        if (!$adress) {
             return response()->json([
-                "message" =>"Não foi possível atualizar o endereço!"
-            ],404);
+                "message" => "Não foi possível atualizar o endereço!"
+            ], 404);
         }
-        $adress->update($request->only(["street",
-        "number",
-        "cep",
-        "city",
-        "state",
-        "country",]));
+        $adress->update($request->only([
+            "street",
+            "number",
+            "cep",
+            "city",
+            "state",
+            "country",
+        ]));
         return response()->json([
-            "message" =>"Endereço atualizado com sucesso!"
+            "message" => "Endereço atualizado com sucesso!"
         ]);
     }
 }

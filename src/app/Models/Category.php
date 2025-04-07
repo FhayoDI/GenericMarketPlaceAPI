@@ -10,7 +10,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    public $filiable = [
+    public $fillable = [
         "name",
         "description",
     ];

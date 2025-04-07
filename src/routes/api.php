@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserAdressController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
@@ -38,16 +40,23 @@ Route::middleware('auth:sanctum')->group(
         Route::get('/user/adress', [UserAdressController::class, 'index']);
         Route::patch('/user/adress/update', [UserAdressController::class, 'update']);
         Route::put('/user/adress/delete', [UserAdressController::class, 'destroy']);
-        Route::get('/user/adress/historico',[UserAdressController::class,'showHistoric']);
         //Categorias
         Route::get('/categorias',[CategoryController::class, 'index']);
         Route::post('/categorias/nova',[CategoryController::class, 'store']);
         //Produtos
-
+        Route::get('/produtos',[ProductsController::class, 'index']);
+        Route::post('/produtos/add', [ProductsController::class, 'store']);
+        Route::get('/produtos/{product}',[ProductsController::class, 'show']);
+        Route::put('/produtos/{product}/deletar',[ProductsController::class, 'destroy']);
+        Route::put('/produtos/{product}/atualizar',[ProductsController::class, 'update']);
         //Carrinho
 
         //Pedidos
-
+        Route::get('/pedidos',[OrderController::class, 'index']);
+        Route::post('/pedidos/add', [OrderController::class, 'store']);
+        Route::get('/pedidos/{id}',[OrderController::class, 'show']);
+        Route::put('/pedidos/{id}/deletar',[OrderController::class, 'destroy']);
+        Route::put('/pedidos/atualizar',[OrderController::class, 'update']);
         //Desconto
 
         //Cupom

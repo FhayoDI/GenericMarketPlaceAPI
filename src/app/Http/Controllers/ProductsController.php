@@ -2,57 +2,61 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreProductsRequest;
-use App\Http\Requests\UpdateProductsRequest;
 use App\Models\Category;
 use App\Models\Products;
-use App\Models\User;
+use Illuminate\Http\Request;
 
 class ProductsController extends Controller
 {
     public function index()
     {
-        return Products::all();
+        return Products::with('category')->get();
     }
-        public function store(StoreProductsRequest $request, Products $products)
-    {
-        $userDataValidation = $request->validated([
-            "category_name" => "required|string",
-            "category_id" => "required|integer",
-            "name" => "required|string",
-            "stock" => "required|integer",
-            "price" => "required|float",
-            "description" => "nullable|string",
-        ]);
-        $products = Products::create($request->all($userDataValidation));
-        return response()->json([
-            "message" => "Criado com sucesso!",
-            "product" => $products,
-        ], 201);
-    }
-    public function show(Products $products)
-    {
-        return response()->json([
-            "product" => $products,
-        ]);
-    }
-    public function update(UpdateProductsRequest $request, Products $products)
-    {
-        $userDataValidation = $request->validated();
-        if (!Category::find($userDataValidation["category_id"])){
-            return response()->json([
-                "message" => "Categoria não encontrada!",
-            ],404);
-        }
-        $products->update($userDataValidation);
-        return response()->json([
-            "message"=> "Produto atualizado com sucesso!",
-            "product"=>$products,
-        ]);
-    }
-    public function destroy(Products $products)
+
+    public function store(Request $request)
 {
-        $products->delete();
+    $validatedData = $request->validate([
+        'category_id' => 'required|integer',
+        'name' => 'required|string',
+        'stock' => 'required|integer',
+        'price' => 'required|numeric',
+        'description' => 'nullable|string',
+    ]);
+
+    $product = Products::create($validatedData);
+
+    return response()->json([
+        "message" => "Criado com sucesso!",
+        "product" => $product,
+    ], 201);
+}
+
+        
+    public function show(Products $product)
+    {
+        return response()->json([
+            "message" => "Produto encontrado!",
+            "category" => $product->category->name,
+            "product" => ["name"=>$product->name,"stock"=>$product->stock,"price"=>$product->price],
+        ], 200);
+    }
+    public function update(Request $request, Products $product)
+    {
+        $userDataValidation = $request->validate([
+            "category_id" => "integer",
+            "name" => "string",
+            "stock" => "integer",
+            "price" => "numeric",
+        ]);
+        $product->update($userDataValidation);
+        return response()->json([
+            "message" => "Produto atualizado com sucesso!",
+            "product" => $product,
+        ]);
+    }
+    public function destroy(Products $product)
+    {
+        $product->delete();
         return response()->json([
             "message" => "Produto deletado com sucesso!",
         ], 204);
