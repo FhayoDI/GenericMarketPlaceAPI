@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCartItemRequest;
-use App\Http\Requests\UpdateCartItemRequest;
 use App\Models\CartItem;
+use App\Models\Products;
+use Illuminate\Http\Request;
 
 class CartItemController extends Controller
 {
@@ -12,8 +12,10 @@ class CartItemController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        //
+    {   
+        $user=auth()->user();
+        return CartItem::all()->where("user_id", $user->id,);
+
     }
 
     /**
@@ -27,33 +29,30 @@ class CartItemController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCartItemRequest $request)
+    public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(CartItem $cartItem)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CartItem $cartItem)
-    {
-        //
+        $validatedData = $request->validate([
+            "product_id"=>"required|exists:products,id",
+            "quantity"=>"required|numeric|min:1",
+        ]);
+        if (!Products::where("id")->$validatedData["product_id"]){
+            return response()->json([
+                "message"=> "Produto não existe!"
+            ],404)
+        }
+        $cartItem= CartItem::create($validatedData);
+        Products::where("id",$validatedData["product_id"])->decrement("stock",$validatedData["stock"]);    
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCartItemRequest $request, CartItem $cartItem)
+    public function update(Request $request, CartItem $cartItem)
     {
-        //
+        $userDataValidation = $request->validate([
+            "product_id"=>"required|exists:products,id",
+            "quantity"=>"required|numeric|min:1",
+        ]);
     }
 
     /**
@@ -61,6 +60,6 @@ class CartItemController extends Controller
      */
     public function destroy(CartItem $cartItem)
     {
-        //
+        $cartItem->delete();
     }
 }

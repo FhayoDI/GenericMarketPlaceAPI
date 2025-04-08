@@ -13,23 +13,14 @@ class CartController extends Controller
      */
     public function index()
     {
-        //
+        $user = auth()->user();
+        return Cart::all()->where("user_id", $user->id);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreCartRequest $request)
     {
-        //
+        
     }
 
     /**
