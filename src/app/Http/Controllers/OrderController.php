@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreOrderRequest;
-use App\Http\Requests\UpdateOrderRequest;
+use App\Models\Coupon;
 use App\Models\Order;
-use App\Models\OrderItem;
-use Illuminate\Auth\Events\Validated;
+use Illuminate\Http\Request;
+use PHPUnit\Framework\Constraint\Count;
 
 class OrderController extends Controller
 {
@@ -18,20 +17,27 @@ class OrderController extends Controller
         ]);
     }
 
-    public function store(StoreOrderRequest $request)
+    public function store(Request $request)
     {
         $user = auth()->user();
         $validateddata = $request->validate([
-            "adress_id"=>"required|exists:adresses,id",
-            "coupon_id"=>"nullable|exist:coupon,id",
+            "adress_id"=>"required|exists:user_adresses,id",
+            "coupon_id"=>"nullable",
             "status"=>"required|in:PENDING,PROCESSING,SHIPPED,COMPLETED,CANCELED",
             "total_amount"=>"required|numeric|min:0",
         ]);
+        
+        $coupon = Coupon::find($validateddata["coupon_id"]);
+        if(!$coupon){
+            return response()->json([
+                "message"=>"o cupon nao existe, remova ou insira um valido"
+            ]);
+        }
         $order = Order::create([
             "user_id"=>$user->id,
             "adress_id"=>$validateddata["adress_id"],
             "orderDate"=> now(),
-            "coupoun_id"=>$validateddata["coupon_id"],
+            "coupon_id"=>$validateddata["coupon_id"],
             "status"=>$validateddata["status"],
             "total_amount"=>$validateddata["total_amount"],
         ]);
@@ -48,7 +54,7 @@ class OrderController extends Controller
             "order"=>$order,
         ]);
     }
-    public function update(UpdateOrderRequest $request, Order $order)
+    public function update(Request $request, Order $order)
     {
         if ($order->status === "COMPLETED"){
             return response()->json([

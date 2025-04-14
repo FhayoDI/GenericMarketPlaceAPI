@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 class CartItemController extends Controller
 {
-    public function index()
-    {
-        $user = auth()->user();
-        return CartItem::all()->where("user_id", $user->id,);
-    }
 
     public function store(Request $request)
     {
@@ -21,8 +16,8 @@ class CartItemController extends Controller
         $validatedData = $request->validate([
             "product_id" => "required|integer|exists:products,id",
             "quantity" => "required|numeric|min:1",
-            "unit_price" => "exists:products,price",
         ]);
+        
         $product = Products::find($validatedData["product_id"]);
         if (!$product) {
             return response()->json([
@@ -39,10 +34,8 @@ class CartItemController extends Controller
             "quantity" => $validatedData["quantity"],
             "price" => $product->price,
             "cart_id" => $cart->id,
-            "name"=>$product->name,
-            
+            "name"=>$product->name, 
         ]);
-        $product->decrement("stock",$validatedData["quantity"]);
         return response()->json([
             "message" => "Item adicionado com sucesso!",
             "cartItem" => $cartItem,
@@ -57,6 +50,9 @@ class CartItemController extends Controller
             "product_id" => "required|exists:products,id",
             "quantity" => "required|numeric|min:1",
         ]);
+        if($request->quantity == 0){
+           $cartItem->delete(); 
+        }
         $cartItem->update($userData);
         return response()->json([
             "message" => "Item atualizado com sucesso!",

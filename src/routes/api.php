@@ -63,8 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Carrinho
     Route::get('/carrinho', [CartController::class, 'index']);
-    Route::post('/carrinho/salvar', [CartController::class, 'store']);
-    Route::post('/carrinho/add', [CartItemController::class, 'store']);
+        Route::post('/carrinho/add', [CartItemController::class, 'store']);
 
     // Pedidos
     Route::get('/pedidos', [OrderController::class, 'index']);

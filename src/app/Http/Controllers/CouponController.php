@@ -14,7 +14,7 @@ class CouponController extends Controller
      */
     public function index()
     {
-        //
+        return Coupon::all();
     }
 
     /**
@@ -22,7 +22,7 @@ class CouponController extends Controller
      */
     public function create()
     {
-        //
+        
     }
 
     /**
@@ -30,7 +30,13 @@ class CouponController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $coupon = $request->validate([
+            "code"=>"required|string",
+            "start_date"=>"required|date",
+            "end_date"=>"required|date",
+            "discount_percentage"=>"required|numeric|min:0|max:100",
+        ]);
+        Coupon::create($coupon);
     }
 
     /**
