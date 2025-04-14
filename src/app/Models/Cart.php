@@ -10,7 +10,8 @@ class Cart extends Model
     use HasFactory;
     public $fillable = [
          "created_at",
-         "user_id"
+         "user_id", 
+         "items",
     ];
 
     public function user() {

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('cart_items', function (Blueprint $table) {
             $table->id();
+            $table->string("name");
             $table->foreignId('cart_id');
             $table->foreignId('product_id');
             $table->integer('quantity');

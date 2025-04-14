@@ -26,5 +26,28 @@ class CategoryController extends Controller
         "category"=>$category,
      ]);   
     }
+    public function update(Request $request){
+      $user = auth()->user();
+      $request->validate([
+         "name"=>"required|string",
+         "description"=>"required|string",
+      ]);
+      $category = Category::where('name', $request->name)->first();
+      if (!$category) {
+          return response()->json([
+              "message" => "Não foi possível atualizar a categoria!"
+          ], 404);
+      }
+      $category->update($request->only([
+         "name",
+         "description"
+      ]));
+      return response()->json([
+          "message" => "Categoria atualizada com sucesso!"
+      ]);
+   }
+   public function delete(Category $category ){
+      $category->delete();
+   }
     
 }

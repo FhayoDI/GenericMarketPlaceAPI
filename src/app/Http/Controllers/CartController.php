@@ -2,56 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCartRequest;
-use App\Http\Requests\UpdateCartRequest;
 use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\UserAdress;
+use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $user = auth()->user();
-        return Cart::all()->where("user_id", $user->id);
+        return response()->json([
+            "message"=>"carrinho do usuario",
+            "usuario"=>$user,
+            CartItem::all("name","quantity","price"),
+            
+        ]);
     }
 
-
-    public function store(StoreCartRequest $request)
-    {
-        
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Cart $cart)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Cart $cart)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCartRequest $request, Cart $cart)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Cart $cart)
     {
-        //
+        $cart->delete();
+        return response()->json([
+            "message" => "Carrinho deletado com sucesso!"
+        ]);
     }
 }

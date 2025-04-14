@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCouponRequest;
 use App\Http\Requests\UpdateCouponRequest;
 use App\Models\Coupon;
+use Illuminate\Http\Request;
 
 class CouponController extends Controller
 {
@@ -27,7 +28,7 @@ class CouponController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCouponRequest $request)
+    public function store(Request $request)
     {
         //
     }
