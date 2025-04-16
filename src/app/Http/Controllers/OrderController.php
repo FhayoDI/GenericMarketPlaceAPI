@@ -27,12 +27,6 @@ class OrderController extends Controller
             "total_amount"=>"required|numeric|min:0",
         ]);
         
-        $coupon = Coupon::find($validateddata["coupon_id"]);
-        if(!$coupon){
-            return response()->json([
-                "message"=>"o cupon nao existe, remova ou insira um valido"
-            ]);
-        }
         $order = Order::create([
             "user_id"=>$user->id,
             "adress_id"=>$validateddata["adress_id"],

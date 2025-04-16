@@ -10,10 +10,11 @@ class Discounts extends Model
     use HasFactory;
     
     public $fillable = [
-        "id",
+        "productId",
+        "discount_percentage",
         "description",
-        "startDate",
-        "endDate",
+        "start_date",
+        "end_date",
     ];
     public function item(){
         return $this->belongsTo(Products::class);

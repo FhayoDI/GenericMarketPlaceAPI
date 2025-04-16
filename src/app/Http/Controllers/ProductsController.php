@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Coupon;
 use App\Models\Products;
 use Illuminate\Http\Request;
 
@@ -14,32 +15,36 @@ class ProductsController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'category_id' => 'required|integer',
-        'name' => 'required|string',
-        'stock' => 'required|integer',
-        'price' => 'required|numeric',
-        'description' => 'nullable|string',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'category_id' => 'required|integer',
+            'name' => 'required|string',
+            'stock' => 'required|integer',
+            'price' => 'required|numeric',
+            'description' => 'nullable|string',
+        ]);
 
-    $product = Products::create($validatedData);
+        $product = Products::create($validatedData);
 
-    return response()->json([
-        "message" => "Criado com sucesso!",
-        "product" => $product,
-    ], 201);
-}
+        return response()->json([
+            "message" => "Criado com sucesso!",
+            "product" => $product,
+        ], 201);
+    }
 
-        
     public function show(Products $product)
     {
         return response()->json([
             "message" => "Produto encontrado!",
             "category" => $product->category->name,
-            "product" => ["name"=>$product->name,"stock"=>$product->stock,"price"=>$product->price],
+            "product" => [
+                "name" => $product->name,
+                "stock" => $product->stock,
+                "price" => $product->price
+            ],
         ], 200);
     }
+
     public function update(Request $request, Products $product)
     {
         $userDataValidation = $request->validate([
@@ -48,15 +53,19 @@ class ProductsController extends Controller
             "stock" => "integer",
             "price" => "numeric",
         ]);
+
         $product->update($userDataValidation);
+
         return response()->json([
             "message" => "Produto atualizado com sucesso!",
             "product" => $product,
         ]);
     }
+
     public function destroy(Products $product)
     {
         $product->delete();
+
         return response()->json([
             "message" => "Produto deletado com sucesso!",
         ], 204);
