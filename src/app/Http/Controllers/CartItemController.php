@@ -10,7 +10,7 @@ class CartItemController extends Controller
 {
 
     public function store(Request $request)
-    {
+    {   
         $user = auth()->user();
         $cart = $user->cart;
         $validatedData = $request->validate([

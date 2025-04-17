@@ -10,11 +10,14 @@ class CartController extends Controller
     {
         $poggers = CartItem::all("name","quantity","unit_price");
         $user = auth()->user()->name;
+        $totalValue = CartItem::sum("unit_price");
         return response()->json([
             "usuario"=>$user,
             "carrinho"=>$poggers,
+            "totalValue"=>$totalValue,
             
         ]);
+
     }
 
     public function destroy(Cart $cart)

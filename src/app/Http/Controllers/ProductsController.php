@@ -17,7 +17,7 @@ class ProductsController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'category_id' => 'required|integer',
+            'category_id' => 'required|integer|exists:category,id',
             'name' => 'required|string',
             'stock' => 'required|integer',
             'price' => 'required|numeric',
@@ -36,7 +36,7 @@ class ProductsController extends Controller
     {
         return response()->json([
             "message" => "Produto encontrado!",
-            "category" => $product->category->name,
+            "category" => optional($product->category)->name,
             "product" => [
                 "name" => $product->name,
                 "stock" => $product->stock,
@@ -68,6 +68,6 @@ class ProductsController extends Controller
 
         return response()->json([
             "message" => "Produto deletado com sucesso!",
-        ], 204);
+        ], 202);
     }
 }

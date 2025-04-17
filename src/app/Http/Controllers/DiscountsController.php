@@ -10,10 +10,6 @@ use Illuminate\Http\Request;
 class DiscountsController extends Controller
 {
 
-    public function create()
-    {
-    
-    }
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -25,11 +21,6 @@ class DiscountsController extends Controller
         ]);
         Discounts::create($data);
     }
-    public function edit(Discounts $discounts) {}
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Discounts $discounts)
     {
         $data = $request->validate([

@@ -12,7 +12,7 @@ class UserAdressController extends Controller
     public function index()
     {
         $user = auth()->user();
-        return UserAdress::all()->where("user_id", $user->id,);
+        return UserAdress::where("user_id")->get();
     }
     public function adress(Request $request)
     {

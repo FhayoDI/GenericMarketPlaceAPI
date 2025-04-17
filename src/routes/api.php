@@ -8,6 +8,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserAdressController;
 use App\Http\Controllers\UserController;
+use App\Models\CartItem;
 use App\Models\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/user/createMod', [UserController::class, 'createMod']);
         Route::get('/user', [UserController::class, 'index']);
         //CATEGORIAS ADMIN 
+        Route::post('/categorias', [CategoryController::class, 'store']);
         Route::get('/categorias', [CategoryController::class, 'index']);
         Route::put('/categorias/{category}/atualizar', [CategoryController::class, 'update']);
         Route::put('/categorias/{category}/deletar', [CategoryController::class, 'delete']);
@@ -59,12 +61,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Produtos
     Route::get('/produtos', [ProductsController::class, 'index']);
     Route::get('/produtos/{product}', [ProductsController::class, 'show']);
-
-
+    
+    
     // Carrinho
     Route::get('/carrinho', [CartController::class, 'index']);
-        Route::post('/carrinho/add', [CartItemController::class, 'store']);
-
+    Route::post('/carrinho/add', [CartItemController::class, 'store']);
+    Route::post('/carrinho/item/rm', [CartItemController::class, 'destroy']);
+    Route::put('/carrinho/item/update', [CartItemController::class, 'update']);
+    
     // Pedidos
     Route::get('/pedidos', [OrderController::class, 'index']);
     Route::post('/pedidos/add', [OrderController::class, 'store']);

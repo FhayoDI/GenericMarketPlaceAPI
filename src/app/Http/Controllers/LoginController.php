@@ -10,17 +10,17 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    public function registration(User $user, Request $request)
+    public function registration(Request $request)
     {
         $request->validate([
             "name"=>"required|string",
             "email"=>"required|email",
-            "password"=>"required|string",
+            "password"=>"required|string|min:6",
         ]);
         $user = User::create([
             "name"=>$request->name,
             "email"=>$request->email,
-            "password"=>$request->password,
+            "password"=>Hash::make($request['password']),
         ]);
 
         return response()->json([
@@ -53,21 +53,5 @@ class LoginController extends Controller
             return response()->json([
                 "message"=>"você deslogou da plataforma!",
             ],200);
-        }
-        public function admin(Request $request){
-            $user = User::where('email',$request->email)->first();
-            if ($user->email == $request->email && $user->password == $request->password){
-                $user->isAdmin = true;
-                $user->save();
-                return response()->json([
-                    "message"=>"Você logado com sucesso!",
-                    "token"=> $user->createToken('Admin')->accessToken,
-                ],200);
-            }
-            else{
-                return response()->json([
-                    "message"=>"Email ou senha incorretos!",
-                ],401);
-            }
         }
 }
