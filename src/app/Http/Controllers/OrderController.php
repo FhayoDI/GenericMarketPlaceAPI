@@ -34,7 +34,7 @@ class OrderController extends Controller
             "orderDate"=> now(),
             "coupon_id"=>$validateddata["coupon_id"],
             "status"=>$validateddata["status"],
-            "total_amount"=>$,
+            "total_amount"=>$validateddata["total_amount"],
         ]);
         return response()->json(["message"=>"Pedido criado com sucesso!!","order"=>$order],201);
     }

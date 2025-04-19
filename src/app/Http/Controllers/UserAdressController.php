@@ -12,7 +12,7 @@ class UserAdressController extends Controller
     public function index()
     {
         $user = auth()->user();
-        return UserAdress::where("user_id")->get();
+        return UserAdress::where("user_id", auth()->id())->get();
     }
     public function adress(Request $request)
     {
@@ -33,10 +33,15 @@ class UserAdressController extends Controller
     }
 
 
-    public function update(UpdateUserAdressRequest $request, UserAdress $userAdress)
+    public function update(Request $request, UserAdress $userAdress)
     {
         $user = auth()->user();
 
+        if($userAdress->user_id != $user->id){
+            return response()->json([
+                "message" => "Não autorizado!"
+            ], 400);
+        }
         $request->validate([
             "street" => "required|string",
             "number" => "required|integer",
@@ -46,7 +51,9 @@ class UserAdressController extends Controller
             "country" => "required|string",
         ]);
 
-        $adress = UserAdress::where('user_id', $user->id,)->first();
+        $adress = UserAdress::where('id', $userAdress->id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
         if (!$adress) {
             return response()->json([
                 "message" => "Não foi possível atualizar o endereço!"

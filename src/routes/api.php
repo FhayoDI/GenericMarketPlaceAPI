@@ -8,71 +8,122 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserAdressController;
 use App\Http\Controllers\UserController;
-use App\Models\CartItem;
-use App\Models\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+/*
+|--------------------------------------------------------------------------
+| Rotas Públicas
+|--------------------------------------------------------------------------
+*/
 
-// Login e registro
 Route::post('/registro', [LoginController::class, 'registration']);
 Route::post('/login', [LoginController::class, 'login']);
-//NAO PRECISA AUTENTICAÇÃO:
-Route::post('/categorias/nova', [CategoryController::class, 'store']);
+
+Route::get('/categorias', [CategoryController::class, 'index']);
 Route::get('/produtos', [ProductsController::class, 'index']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    //USUARIO
-    Route::put('/user/{user}/update', [UserController::class, 'update']);
-    Route::put('/user/{user}/delete', [UserController::class, 'delete']);
-    Route::get('/user/{user}', [UserController::class, 'show']);
-    //ADMIN COMANDOS
-    //GESTÃO DE USUARIOS:
-    Route::middleware('is_admin')->group(function () {
-        Route::post('/user/create', [UserController::class, 'create']);
-        Route::post('/user/createMod', [UserController::class, 'createMod']);
-        Route::get('/user', [UserController::class, 'index']);
-        //CATEGORIAS ADMIN 
-        Route::post('/categorias', [CategoryController::class, 'store']);
-        Route::get('/categorias', [CategoryController::class, 'index']);
-        Route::put('/categorias/{category}/atualizar', [CategoryController::class, 'update']);
-        Route::put('/categorias/{category}/deletar', [CategoryController::class, 'delete']);
+/*
+|--------------------------------------------------------------------------
+| Rotas Protegidas por Autenticação
+|--------------------------------------------------------------------------
+*/
 
-        //PRODUTOS ADMIN/MODERATOR
-        Route::post('/produtos/add', [ProductsController::class, 'store']);
-        Route::put('/produtos/{product}/atualizar', [ProductsController::class, 'update']);
-        Route::put('/produtos/{product}/deletar', [ProductsController::class, 'destroy']);
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Informações do usuário autenticado
+    Route::get('/usuario', fn (Request $request) => $request->user());
+
+    // Perfil do usuário
+    Route::prefix('/usuario')->group(function () {
+        Route::get('/perfil', [UserController::class, 'ReturnUser']);
+        Route::put('/atualizar', [UserController::class, 'update']);
+        Route::delete('/excluir', [UserController::class, 'delete']); // Usuário pode excluir própria conta
     });
-    // logout
+
+    // Logout
     Route::post('/logout', [LoginController::class, 'logout']);
 
-    //endereços
-    Route::post('/user/adress', [UserAdressController::class, 'adress']);
-    Route::get('/user/adress', [UserAdressController::class, 'index']);
-    Route::patch('/user/adress/update', [UserAdressController::class, 'update']);
-    Route::put('/user/adress/delete', [UserAdressController::class, 'destroy']);
+    /*
+    |--------------------------------------------------------------------------
+    | Endereços do Usuário
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('/usuario/endereco')->group(function () {
+        Route::post('/', [UserAdressController::class, 'adress']);
+        Route::get('/', [UserAdressController::class, 'index']);
+        Route::patch('/atualizar', [UserAdressController::class, 'update']);
+        Route::delete('/excluir', [UserAdressController::class, 'destroy']);
+    });
+        
+    /*
+    |--------------------------------------------------------------------------
+    | Carrinho
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('/carrinho')->group(function () {
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/adicionar', [CartItemController::class, 'store']);
+        Route::delete('/item/remover', [CartItemController::class, 'destroy']);
+        Route::put('/item/atualizar', [CartItemController::class, 'update']);
+    });
 
-    // Categorias
+    /*
+    |--------------------------------------------------------------------------
+    | Pedidos
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('/pedidos')->group(function () {
+        Route::get('/', [OrderController::class, 'index']);
+        Route::post('/novo', [OrderController::class, 'store']);
+        Route::get('/{id}', [OrderController::class, 'show']);
+        Route::delete('/{id}/excluir', [OrderController::class, 'destroy']);
+    });
 
+    // Atualizar status do pedido (apenas moderador)
+    Route::middleware('is_moderator')->put('/pedidos/{id}/status', [OrderController::class, 'updateStatus']);
 
-    // Produtos
-    Route::get('/produtos', [ProductsController::class, 'index']);
-    Route::get('/produtos/{product}', [ProductsController::class, 'show']);
-    
-    
-    // Carrinho
-    Route::get('/carrinho', [CartController::class, 'index']);
-    Route::post('/carrinho/add', [CartItemController::class, 'store']);
-    Route::post('/carrinho/item/rm', [CartItemController::class, 'destroy']);
-    Route::put('/carrinho/item/update', [CartItemController::class, 'update']);
-    
-    // Pedidos
-    Route::get('/pedidos', [OrderController::class, 'index']);
-    Route::post('/pedidos/add', [OrderController::class, 'store']);
-    Route::get('/pedidos/{id}', [OrderController::class, 'show']);
-    Route::put('/pedidos/{id}/deletar', [OrderController::class, 'destroy']);
-    Route::put('/pedidos/atualizar', [OrderController::class, 'update']);
+    /*
+    |--------------------------------------------------------------------------
+    | Produtos
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('/produtos')->group(function () {
+        Route::get('/{product}', [ProductsController::class, 'show']);
+        
+        // Rotas apenas para moderador
+        Route::middleware('is_moderator')->group(function () {
+            Route::post('/novo', [ProductsController::class, 'store']);
+            Route::put('/{product}/atualizar', [ProductsController::class, 'update']);
+            Route::delete('/{product}/excluir', [ProductsController::class, 'destroy']);
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rotas exclusivas para ADMIN
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('is_admin')->group(function () {
+        // Gerenciamento de usuários
+        Route::prefix('/usuarios')->group(function () {
+            Route::get('/', [UserController::class, 'index']);
+            Route::post('/novo', [UserController::class, 'create']);
+            Route::post('/novo-moderador', [UserController::class, 'createMod']);
+        });
+
+        // Gerenciamento de categorias
+        Route::prefix('/categorias')->group(function () {
+            Route::post('/nova', [CategoryController::class, 'store']);
+            Route::put('/{category}/atualizar', [CategoryController::class, 'update']);
+            Route::delete('/{category}/excluir', [CategoryController::class, 'delete']);
+        });
+    });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Health Check (para monitoramento)
+|--------------------------------------------------------------------------
+*/
+Route::get('/status', fn () => response()->json(['status' => 'online']));
