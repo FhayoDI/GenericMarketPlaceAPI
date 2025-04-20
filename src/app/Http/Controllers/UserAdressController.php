@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateUserAdressRequest;
+
 use App\Models\UserAdress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +11,6 @@ class UserAdressController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
         return UserAdress::where("user_id", auth()->id())->get();
     }
     public function adress(Request $request)
@@ -69,6 +68,19 @@ class UserAdressController extends Controller
         ]));
         return response()->json([
             "message" => "Endereço atualizado com sucesso!"
+        ]);
+    }
+    public function destroy(UserAdress $userAdress){
+        $user = auth()->user();
+
+        if($userAdress->user_id != $user->id){
+            return response()->json([
+                "message" => "Não autorizado!"
+            ], 400);
+        }
+        $userAdress->delete();
+        return response()->json([
+            "message" => "Endereço excluído com sucesso!"
         ]);
     }
 }

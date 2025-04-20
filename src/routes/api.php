@@ -53,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [UserAdressController::class, 'adress']);
         Route::get('/', [UserAdressController::class, 'index']);
         Route::patch('/atualizar', [UserAdressController::class, 'update']);
-        Route::delete('/excluir', [UserAdressController::class, 'destroy']);
+        Route::delete('/excluir/{userAdress}', [UserAdressController::class, 'destroy']);
     });
         
     /*
@@ -115,8 +115,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Gerenciamento de categorias
         Route::prefix('/categorias')->group(function () {
             Route::post('/nova', [CategoryController::class, 'store']);
-            Route::put('/{category}/atualizar', [CategoryController::class, 'update']);
-            Route::delete('/{category}/excluir', [CategoryController::class, 'delete']);
+            Route::put('/{id}/atualizar', [CategoryController::class, 'update']);
+            Route::delete('/{id}/excluir', [CategoryController::class, 'delete']);
         });
     });
 });
