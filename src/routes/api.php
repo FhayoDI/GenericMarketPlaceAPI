@@ -4,6 +4,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\DiscountsController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductsController;
@@ -41,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('/usuario')->group(function () {
         Route::get('/perfil', [UserController::class, 'ReturnUser']);
         Route::put('/atualizar', [UserController::class, 'update']);
-        Route::delete('/excluir', [UserController::class, 'delete']); // Usuário pode excluir própria conta
+        Route::delete('/excluir', [UserController::class, 'delete']);
     });
 
     // Logout
@@ -87,7 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Atualizar status do pedido (apenas moderador)
     Route::middleware('is_moderator')->put('/pedidos/{id}/status', [OrderController::class, 'updateStatus']);
     
-    //Cupom usuarios auth
+    // Verificação de cupom (usuários autenticados)
     Route::post('/cupom/verificar', [CouponController::class, 'check']);    
 
     /*
@@ -125,10 +126,19 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{id}/atualizar', [CategoryController::class, 'update']);
             Route::delete('/{id}/excluir', [CategoryController::class, 'delete']);
         });
-        // Geremciamento de cupons
-        Route::post('/cupons', [CouponController::class, 'store']);
-        Route::delete('/cupons/{cupon}', [CouponController::class, 'destroy']);
+
+        // Gerenciamento de cupons (NOVO)
+        Route::prefix('/cupons')->group(function () {
+            Route::get('/', [CouponController::class, 'index']); // Listagem admin
+            Route::post('/', [CouponController::class, 'store']);
+            Route::delete('/{cupon}', [CouponController::class, 'destroy']);
+        });
+
+        // Gerenciamento de descontos (NOVO)
+        Route::prefix('/descontos')->group(function () {
+            Route::post('/', [DiscountsController::class, 'store']);
+            Route::put('/{desconto}', [DiscountsController::class, 'update']);
+            Route::delete('/{desconto}', [DiscountsController::class, 'destroy']);
+        });
     });
 });
-
-

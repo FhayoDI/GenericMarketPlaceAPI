@@ -4,8 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-use function PHPSTORM_META\type;
-
 return new class extends Migration
 {
     /**
@@ -16,11 +14,11 @@ return new class extends Migration
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->enum('type',['percentage', 'fixed']);
-            $table->decimal('value',8,2);
-            $table->dateTime("expiresAt");
-            $table->integer("usageLimit")->nullable();
-            $table->integer("used")->default(0);
+            $table->enum('type', ['percentage', 'fixed']);
+            $table->decimal('value', 10, 2);
+            $table->dateTime('expires_at');
+            $table->integer('usage_limit')->nullable();
+            $table->integer('used')->default(0);
             $table->timestamps();
         });
     }
