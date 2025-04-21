@@ -28,7 +28,7 @@ Route::get('/cupons', [CouponController::class, 'index']);
 
 
 /*
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------
 | Rotas Protegidas por Autenticação
 |--------------------------------------------------------------------------
 */
@@ -129,7 +129,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Gerenciamento de cupons (NOVO)
         Route::prefix('/cupons')->group(function () {
-            Route::get('/', [CouponController::class, 'index']); // Listagem admin
             Route::post('/', [CouponController::class, 'store']);
             Route::delete('/{cupon}', [CouponController::class, 'destroy']);
         });
