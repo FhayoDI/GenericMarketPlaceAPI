@@ -1,33 +1,32 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('productId')->references('id')->on('products')->onDelete('cascade');
-            $table->foreignId('categoryId')->references('id')->on('categories')->onDelete('cascade');
-            $table->text('description');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->decimal('discount_percentage');
+            $table->enum('type', ['percentage', 'fixed']);
+            $table->decimal('discount_value', 10, 2);
+            $table->string('description')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
             $table->timestamps();
+        });
+
+        Schema::create('discount_product', function (Blueprint $table) {
+            $table->foreignId('discount_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->primary(['discount_id', 'product_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
+        Schema::dropIfExists('discount_product');
         Schema::dropIfExists('discounts');
     }
 };

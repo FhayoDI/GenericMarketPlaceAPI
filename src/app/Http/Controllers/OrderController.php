@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Products;
 use Illuminate\Http\Request;
-use PHPUnit\Framework\Constraint\Count;
 
 class OrderController extends Controller
 {
@@ -83,7 +83,91 @@ class OrderController extends Controller
         'message'=>"Pedido removido com sucesso!!",
     ]);
 }
-public function closeOrder(Cart $cart,Request $request){
+public function closeOrder(Request $request)
+{
+    $user = auth()->user();
+    $cart = $user->cart;
+
+$validated = $request->validate([
+        'address_id' => 'required|exists:user_adresses,id',
+        'coupon_code' => 'nullable|string|exists:coupons,code'
+    ]);
+
+$subtotal = 0;
+    $itemsDetails = [];
+    
+    foreach ($cart->items as $item) {
+        $itemSubtotal = ($item->unit_price * $item->quantity);
+        $subtotal += $itemSubtotal;
         
+        $itemsDetails[] = [
+            'product_id' => $item->product_id,
+            'quantity' => $item->quantity,
+            'unit_price' => $item->unit_price,
+            'discount_applied' => $item->discount * $item->quantity
+        ];
+    }
+
+
+    $totalDiscount = 0;
+    $coupon = null;
+    
+    if (!empty($validated['coupon_code'])) {
+        $coupon = Coupon::where('code', $validated['coupon_code'])->first();
+        
+        if ($coupon && $coupon->isValid()) {
+            $totalDiscount = $coupon->type === 'percentage' 
+                ? $subtotal * ($coupon->value / 100)
+                : min($coupon->value, $subtotal);
+            
+            $coupon->increment('used');
+        }
+    }
+
+
+    $order = Order::create([
+        'user_id' => $user->id,
+        'address_id' => $validated['address_id'],
+        'orderDate' => now(),
+        'coupon_id' => $coupon->id ?? null,
+        'status' => 'PENDING',
+        'subtotal' => $subtotal,
+        'total_discount' => $totalDiscount,
+        'total_amount' => $subtotal - $totalDiscount
+    ]);
+
+foreach ($cart->items as $item) {
+        OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $item->product_id,
+            'quantity' => $item->quantity,
+            'unit_price' => $item->unit_price,
+            'discount' => $item->discount
+        ]);
+
+
+        Products::where('id', $item->product_id)
+                ->decrement('stock', $item->quantity);
+    }
+
+    $cart->items()->delete();
+
+    return response()->json([
+        'message' => 'Pedido finalizado com sucesso!',
+        'order_id' => $order->id,
+        'subtotal' => $subtotal,
+        'desconto_itens' => array_sum(array_column($itemsDetails, 'discount_applied')),
+        'desconto_cupom' => $totalDiscount,
+        'total' => $order->total_amount,
+        'itens' => $itemsDetails
+    ], 201);
+}
+private function calculateDiscount(?Coupon $coupon, $total)
+{
+    if (!$coupon) return 0;
+
+    return $coupon->type === 'percentage' 
+        ? $total * ($coupon->value / 100)
+        : min($coupon->value, $total);
 }
 }

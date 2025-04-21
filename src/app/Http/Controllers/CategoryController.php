@@ -75,7 +75,6 @@ class CategoryController extends Controller
       }
 
       $category->delete();
-
       return response()->json([
          "message" => "Categoria excluída com sucesso!"
       ]);

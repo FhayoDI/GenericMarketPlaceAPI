@@ -3,6 +3,7 @@
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductsController;
@@ -22,6 +23,8 @@ Route::post('/login', [LoginController::class, 'login']);
 
 Route::get('/categorias', [CategoryController::class, 'index']);
 Route::get('/produtos', [ProductsController::class, 'index']);
+Route::get('/cupons', [CouponController::class, 'index']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Informações do usuário autenticado
     Route::get('/usuario', fn (Request $request) => $request->user());
-
+    
     // Perfil do usuário
     Route::prefix('/usuario')->group(function () {
         Route::get('/perfil', [UserController::class, 'ReturnUser']);
@@ -78,10 +81,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/novo', [OrderController::class, 'store']);
         Route::get('/{id}', [OrderController::class, 'show']);
         Route::delete('/{id}/excluir', [OrderController::class, 'destroy']);
+        Route::post('/pedidos/finalizar', [OrderController::class, 'closeOrder']); 
     });
 
     // Atualizar status do pedido (apenas moderador)
     Route::middleware('is_moderator')->put('/pedidos/{id}/status', [OrderController::class, 'updateStatus']);
+    
+    //Cupom usuarios auth
+    Route::post('/cupom/verificar', [CouponController::class, 'check']);    
 
     /*
     |--------------------------------------------------------------------------
@@ -118,12 +125,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{id}/atualizar', [CategoryController::class, 'update']);
             Route::delete('/{id}/excluir', [CategoryController::class, 'delete']);
         });
+        // Geremciamento de cupons
+        Route::post('/cupons', [CouponController::class, 'store']);
+        Route::delete('/cupons/{cupon}', [CouponController::class, 'destroy']);
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Health Check (para monitoramento)
-|--------------------------------------------------------------------------
-*/
-Route::get('/status', fn () => response()->json(['status' => 'online']));
+

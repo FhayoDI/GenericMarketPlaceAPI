@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('product_id');
             $table->integer('quantity');
             $table->decimal('unit_price')->references("price")->on("products")->onDelete("cascade");
+            $table->decimal('discount')->default(0);
             $table->timestamps();
         });
     }

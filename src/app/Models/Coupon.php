@@ -18,12 +18,16 @@ class Coupon extends Model
     ];
     protected $datas = ["expiresAt"];
 
-    public function isValid(){
-        return $this->expiresAt->isFuture() && 
-            ($this->usageLimit == null || $this->used < $this->usageLimit);   
-    }
+    public function isValid()
+{
+    $now = now();
+    $isExpired = $this->expiresAt <= $now;
+    $overLimit = $this->usageLimit && $this->used >= $this->usageLimit;
+    return !$isExpired && !$overLimit;
+}
     public function order() 
     {
         return $this->hasMany(Order::class);
     }
+
 }
