@@ -36,14 +36,13 @@ Route::get('/cupons', [CouponController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     
     // Informações do usuário autenticado
-    Route::get('/usuario', fn (Request $request) => $request->user());
     
     // Perfil do usuário
     Route::prefix('/usuario')->group(function () {
-        Route::get('/perfil', [UserController::class, 'ReturnUser']);
+        Route::get('/perfil', fn (Request $request) => $request->user());
         Route::put('/atualizar', [UserController::class, 'update']);
-        Route::delete('/excluir', [UserController::class, 'delete']);
-    });
+            Route::delete('/excluir', [UserController::class, 'delete']);
+        });
 
     // Logout
     Route::post('/logout', [LoginController::class, 'logout']);
@@ -56,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('/usuario/endereco')->group(function () {
         Route::post('/', [UserAdressController::class, 'adress']);
         Route::get('/', [UserAdressController::class, 'index']);
-        Route::patch('/atualizar', [UserAdressController::class, 'update']);
+        Route::patch('/atualizar/{userAdress}', [UserAdressController::class, 'update']);
         Route::delete('/excluir/{userAdress}', [UserAdressController::class, 'destroy']);
     });
         

@@ -16,7 +16,7 @@ class IsModerator
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!auth()->check() || !auth()->user()->is_moderator || auth()->user()->is_admin){
+        if(!auth()->check() && !auth()->user()->is_moderator && !auth()->user()->is_admin){
             abort(403,"O usuario não tem acesso a essa página!");
         }
         return $next($request);
