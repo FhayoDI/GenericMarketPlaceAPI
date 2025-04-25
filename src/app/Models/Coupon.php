@@ -4,30 +4,35 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Coupon extends Model
 {
     use HasFactory;
-    public $fillable = [
+    
+    protected $fillable = [
         "code",
         "type",
         "value",
-        "expiresAt",
-        "usageLimit",
-        "used",
+        "expires_at",  
+        "usage_limit", 
     ];
-    protected $datas = ["expiresAt"];
+    
+    protected $dates = ["expires_at"]; 
 
     public function isValid()
-{
-    $now = now();
-    $isExpired = $this->expiresAt <= $now;
-    $overLimit = $this->usageLimit && $this->used >= $this->usageLimit;
-    return !$isExpired && !$overLimit;
-}
-    public function order() 
+    {
+    
+        $notExpired = $this->expires_at === null || $this->expires_at->isFuture();
+        
+    
+        $withinUsageLimit = $this->usage_limit === null || $this->used < $this->usage_limit;
+        
+        return $notExpired && $withinUsageLimit;
+    }
+
+    public function orders() 
     {
         return $this->hasMany(Order::class);
     }
-
 }

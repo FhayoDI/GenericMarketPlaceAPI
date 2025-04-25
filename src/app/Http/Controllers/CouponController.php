@@ -18,12 +18,15 @@ class CouponController extends Controller
             'code' => 'required|string|unique:coupons|max:20',
             'type' => 'required|in:percentage,fixed',
             'value' => 'required|numeric|min:0',
-            'expiresAt' => 'required|date|after:now',
-            'usageLimit' => 'nullable|integer|min:1'
+            'expiresAt' => 'sometimes|date|after:now',
+            'usageLimit' => 'sometimes|integer|min:1'
         ]);
-
-        $coupon = Coupon::create($validated);
-
+    
+        $coupon = Coupon::create(array_merge(
+            $request->only(['code', 'type', 'value']),
+            $request->only(['expiresAt', 'usageLimit'])
+        ));
+    
         return response()->json([
             'message' => 'Cupom criado com sucesso!',
             'coupon' => $coupon
@@ -34,9 +37,10 @@ class CouponController extends Controller
     {
         $request->validate(['code' => 'required|string']);
 
+        
         $coupon = Coupon::where('code', $request->code)->first();
 
-        if (!$coupon || !$coupon->isValid()) {
+        if (!$coupon->isValid()) {
             return response()->json([
                 'message' => 'Cupom inválido ou expirado!'
             ], 400);
@@ -56,9 +60,9 @@ class CouponController extends Controller
             : min($coupon->value, $total);
     }
 
-    public function destroy(Coupon $coupon)
+    public function destroy(Coupon $cupon)
     {
-        $coupon->delete();
+        $cupon->delete();
         
         return response()->json([
             'message' => 'Cupom removido com sucesso!'

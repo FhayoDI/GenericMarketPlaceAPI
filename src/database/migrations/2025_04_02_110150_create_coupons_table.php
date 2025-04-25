@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->enum('type', ['percentage', 'fixed']);
             $table->decimal('value', 10, 2);
-            $table->dateTime('expires_at');
+            $table->dateTime('expires_at')->nullable()  ;
             $table->integer('usage_limit')->nullable();
             $table->integer('used')->default(0);
             $table->timestamps();

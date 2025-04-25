@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Coupon;
 use App\Models\Products;
 use Illuminate\Http\Request;
 
@@ -17,7 +15,7 @@ class ProductsController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'category_id' => 'required|integer|exists:category,id',
+            'category_id' => 'required|integer|exists:categories,id',
             'name' => 'required|string',
             'stock' => 'required|integer',
             'price' => 'required|numeric',

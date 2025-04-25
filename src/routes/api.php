@@ -88,7 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('is_moderator')->put('/pedidos/{id}/status', [OrderController::class, 'updateStatus']);
     
     // Verificação de cupom (usuários autenticados)
-    Route::post('/cupom/verificar', [CouponController::class, 'check']);    
+    Route::put('/cupom/verificar/', [CouponController::class, 'check']);    
 
     /*
     |--------------------------------------------------------------------------
@@ -128,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Gerenciamento de cupons (NOVO)
         Route::prefix('/cupons')->group(function () {
-            Route::post('/', [CouponController::class, 'store']);
+            Route::post('/', [CouponController::class, 'sto re']);
             Route::delete('/{cupon}', [CouponController::class, 'destroy']);
         });
 
