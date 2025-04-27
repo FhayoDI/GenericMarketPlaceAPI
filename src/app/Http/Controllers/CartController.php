@@ -8,7 +8,7 @@ class CartController extends Controller
 {
     public function index()
     {
-        $poggers = CartItem::all("name","quantity","unit_price");
+        $poggers = CartItem::all("product_id", "quantity", "unit_price");
         $user = auth()->user()->name;
         $totalValue = CartItem::sum("unit_price");
         return response()->json([
