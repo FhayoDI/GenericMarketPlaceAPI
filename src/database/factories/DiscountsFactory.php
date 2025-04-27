@@ -4,20 +4,16 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Discounts>
- */
 class DiscountsFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'type' => $this->faker->randomElement(['percentage', 'fixed']),
+            'discount_value' => $this->faker->numberBetween(5, 50),
+            'description' => $this->faker->sentence,
+            'start_date' => now(),
+            'end_date' => now()->addMonth(),
         ];
     }
 }

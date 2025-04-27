@@ -7,167 +7,149 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     public function index()
     {
         return response()->json([
-            "message"=> "Todos os seus pedidos:",
-            "order"=>Order::where('user_id',auth()->id())->get(),
+            "message" => "Todos os seus pedidos:",
+            "orders" => Order::with(['items.product', 'coupon'])
+                        ->where('user_id', auth()->id())
+                        ->latest()
+                        ->get(),
+        ]);
+    }
+
+    public function show(Order $order)
+    {
+        $this->authorize('view', $order);
+        
+        return response()->json([
+            "message" => "Detalhes do pedido #". $order->id,
+            "order" => $order->load(['items.product', 'coupon']),
+        ]);
+    }
+
+
+    public function update(Request $request, Order $order)
+    {
+        $this->authorize('update', $order);
+        
+        if ($order->status === "COMPLETED") {
+            return response()->json([
+                "message" => "Não é possível alterar pedidos completados!"
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            "status" => "required|in:PENDING,PROCESSING,SHIPPED,COMPLETED,CANCELED"
+        ]);
+
+        $order->update($validated);
+
+        return response()->json([
+            "message" => "Status atualizado com sucesso!",
+            "order" => $order,
+        ]);
+    }
+
+
+    public function destroy(Order $order)
+    {
+        $this->authorize('delete', $order);
+
+        if ($order->status === "COMPLETED") {
+            return response()->json([
+                "message" => "Não é possível excluir pedidos completados!"
+            ], 403);
+        }
+
+        $order->delete();
+
+        return response()->json([
+            'message' => "Pedido removido com sucesso!",
         ]);
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
-        $validateddata = $request->validate([
-            "adress_id"=>"required|exists:user_adresses,id",
-            "coupon_id"=>"nullable|exists:coupons,id",
-            "status"=>"required|in:PENDING,PROCESSING,SHIPPED,COMPLETED,CANCELED",
-            "total_amount"=>"required|numeric|min:0",
-        ]);
         
-        $order = Order::create([
-            "user_id"=>$user->id,
-            "adress_id"=>$validateddata["adress_id"],
-            "orderDate"=> now(),
-            "coupon_id"=>$validateddata["coupon_id"],
-            "status"=>$validateddata["status"],
-            "total_amount"=>$validateddata["total_amount"],
+        $validated = $request->validate([
+            'address_id' => 'required|exists:user_addresses,id',
+            'coupon_code' => 'nullable|string|exists:coupons,code'
         ]);
-        return response()->json(["message"=>"Pedido criado com sucesso!!","order"=>$order],201);
-    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Order $order)
-    {
-        if($order->user_id !== auth()->id()){
-            return response()->json([
-                "message"=>"pedido inexistente",
-            ],404);
-        }
-        
-        return response()->json([
-            "messagem"=> "Seu pedido de ". $order->id,
-            "order"=>$order,
-        ]);
-    }
-    public function update(Request $request, Order $order)
-    {
-        if ($order->status === "COMPLETED"){
-            return response()->json([
-                "message"=> "Não pode fazer altereações em pedidos completados!"
-            ],403);
-        }
-        $status = $request->validate([
-            "status"=>"required"
-        ]);
-        $order->update($status);
-        return response()->json([
-            "message"=> "Status do pedido atualizado com sucesso!!",
-            "order"=>$order,
-        ]);
-    }
-    public function destroy(Order $order)
-    {
-        if($order->user_id !== auth()->id()){
-            return response()->json([
-                "message"=>"você não tem permissão para excluir esse pedido",
-            ]);
-    }
-    $order->delete();
-    return response()->json([
-        'message'=>"Pedido removido com sucesso!!",
-    ]);
-}
-public function closeOrder(Request $request)
-{
-    $user = auth()->user();
-    $cart = $user->cart;
-
-$validated = $request->validate([
-        'address_id' => 'required|exists:user_adresses,id',
-        'coupon_code' => 'nullable|string|exists:coupons,code'
-    ]);
-
-$subtotal = 0;
-    $itemsDetails = [];
-    
-    foreach ($cart->items as $item) {
-        $itemSubtotal = ($item->unit_price * $item->quantity);
-        $subtotal += $itemSubtotal;
-        
-        $itemsDetails[] = [
-            'product_id' => $item->product_id,
-            'quantity' => $item->quantity,
-            'unit_price' => $item->unit_price,
-            'discount_applied' => $item->discount * $item->quantity
-        ];
-    }
-
-
-    $totalDiscount = 0;
-    $coupon = null;
-    
-    if (!empty($validated['coupon_code'])) {
-        $coupon = Coupon::where('code', $validated['coupon_code'])->first();
-        
-        if ($coupon && $coupon->isValid()) {
-            $totalDiscount = $coupon->type === 'percentage' 
-                ? $subtotal * ($coupon->value / 100)
-                : min($coupon->value, $subtotal);
+        return DB::transaction(function () use ($user, $validated) {
+            $cart = $user->cart;
             
-            $coupon->increment('used');
+            if ($cart->items->isEmpty()) {
+                return response()->json([
+                    "message" => "Seu carrinho está vazio"
+                ], 422);
+            }
+
+            $subtotal = $cart->items->sum(function ($item) {
+                return ($item->unit_price - $item->discount) * $item->quantity;
+            });
+
+            $coupon = !empty($validated['coupon_code'])
+                ? Coupon::where('code', $validated['coupon_code'])->first()
+                : null;
+                
+            $couponDiscount = $this->calculateDiscount($coupon, $subtotal);
+            $total = $subtotal - $couponDiscount;
+
+            $order = Order::create([
+                'user_id' => $user->id,
+                'address_id' => $validated['address_id'],
+                'order_date' => now(),
+                'coupon_id' => $coupon->id ?? null,
+                'status' => 'PENDING',
+                'subtotal' => $subtotal,
+                'total_discount' => $couponDiscount,
+                'total_amount' => $total
+            ]);
+            foreach ($cart->items as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'discount' => $item->discount
+                ]);
+                $item->product->decrement('stock', $item->quantity);
+            }
+
+            $cart->items()->delete();
+
+            return response()->json([
+                'message' => 'Pedido criado com sucesso!',
+                'order' => $order->load('items.product'),
+                'summary' => [
+                    'subtotal' => $subtotal,
+                    'discount' => $couponDiscount,
+                    'total' => $total
+                ]
+            ], 201);
+        });
+    }
+
+
+    private function calculateDiscount(Coupon $coupon, float $total): float
+    {
+        if (!$coupon || !$coupon->isValid()) {
+            return 0;
         }
+
+        $discount = $coupon->type === 'percentage' 
+            ? $total * ($coupon->value / 100)
+            : min($coupon->value, $total);
+        
+        $coupon->increment('used');
+        
+        return $discount;
     }
-
-
-    $order = Order::create([
-        'user_id' => $user->id,
-        'address_id' => $validated['address_id'],
-        'orderDate' => now(),
-        'coupon_id' => $coupon->id ?? null,
-        'status' => 'PENDING',
-        'subtotal' => $subtotal,
-        'total_discount' => $totalDiscount,
-        'total_amount' => $subtotal - $totalDiscount
-    ]);
-
-foreach ($cart->items as $item) {
-        OrderItem::create([
-            'order_id' => $order->id,
-            'product_id' => $item->product_id,
-            'quantity' => $item->quantity,
-            'unit_price' => $item->unit_price,
-            'discount' => $item->discount
-        ]);
-
-
-        Products::where('id', $item->product_id)
-                ->decrement('stock', $item->quantity);
-    }
-
-    $cart->items()->delete();
-
-    return response()->json([
-        'message' => 'Pedido finalizado com sucesso!',
-        'order_id' => $order->id,
-        'subtotal' => $subtotal,
-        'desconto_itens' => array_sum(array_column($itemsDetails, 'discount_applied')),
-        'desconto_cupom' => $totalDiscount,
-        'total' => $order->total_amount,
-        'itens' => $itemsDetails
-    ], 201);
-}
-private function calculateDiscount(?Coupon $coupon, $total)
-{
-    if (!$coupon) return 0;
-
-    return $coupon->type === 'percentage' 
-        ? $total * ($coupon->value / 100)
-        : min($coupon->value, $total);
-}
 }

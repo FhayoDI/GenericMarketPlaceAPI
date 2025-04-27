@@ -4,20 +4,18 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserAdress>
- */
 class UserAdressFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'user_id' => \App\Models\User::factory(),
+            'street' => $this->faker->streetName(),
+            'number' => $this->faker->buildingNumber(),
+            'cep' => (int) $this->faker->postcode(), // converte pra inteiro
+            'city' => $this->faker->city(),
+            'state' => $this->faker->stateAbbr(), // exemplo: 'PR', 'SP'
+            'country' => $this->faker->country(),
         ];
     }
 }

@@ -77,15 +77,15 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('/pedidos')->group(function () {
-        Route::get('/', [OrderController::class, 'index']);
-        Route::post('/novo', [OrderController::class, 'store']);
-        Route::get('/{id}', [OrderController::class, 'show']);
-        Route::delete('/{id}/excluir', [OrderController::class, 'destroy']);
-        Route::post('/pedidos/finalizar', [OrderController::class, 'closeOrder']); 
-    });
+    Route::get('/', [OrderController::class, 'index']);
+    Route::post('/novo', [OrderController::class, 'store']);
+    Route::get('/{order}', [OrderController::class, 'show']);
+});
+
+    Route::middleware('is_moderator')->delete('/orders/{order}', [OrderController::class, 'destroy']);  
 
     // Atualizar status do pedido (apenas moderador)
-    Route::middleware('is_moderator')->put('/pedidos/{id}/status', [OrderController::class, 'updateStatus']);
+    Route::middleware('is_moderator')->put('/pedidos/{id}/status', [OrderController::class, 'update']);
     
     // Verificação de cupom (usuários autenticados)
     Route::put('/cupom/verificar/', [CouponController::class, 'check']);    
@@ -128,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Gerenciamento de cupons (NOVO)
         Route::prefix('/cupons')->group(function () {
-            Route::post('/', [CouponController::class, 'sto re']);
+            Route::post('/', [CouponController::class, 'store']);
             Route::delete('/{cupon}', [CouponController::class, 'destroy']);
         });
 
