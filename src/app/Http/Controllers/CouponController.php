@@ -60,9 +60,9 @@ class CouponController extends Controller
             : min($coupon->value, $total);
     }
 
-    public function destroy(Coupon $cupon)
+    public function destroy(Coupon $coupon)
     {
-        $cupon->delete();
+        $coupon->delete();
         
         return response()->json([
             'message' => 'Cupom removido com sucesso!'

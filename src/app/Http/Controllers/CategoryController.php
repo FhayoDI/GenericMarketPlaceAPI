@@ -31,7 +31,7 @@ class CategoryController extends Controller
       if (!$request->has(['name', 'description'])) {
          return response()->json([
             "message" => "Dados incompletos! Envie name e description",
-            "received_data" => $request->all() // Mostra o que realmente chegou
+            "received_data" => $request->all() 
          ], 400);
       }
 

@@ -47,7 +47,7 @@ class LoginController extends Controller
         ],200);
     }
         
-        public function logout(Request $request){
+        public function logoutin(Request $request){
             $request->user()->currentAccessToken()->delete();
             return response()->json([
                 "message"=>"você deslogou da plataforma!",

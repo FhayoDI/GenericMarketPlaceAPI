@@ -12,11 +12,14 @@ class Order extends Model
     use HasFactory;
     public $fillable = [
         "user_id",
-        "adress_id",
-        "orderDate",
+        "address_id",
+        "order_date",
         "coupon_id",
         "status",
-        "total_amount",
+        "subtotal",
+        "products_discount",
+        "coupon_discount",
+        "total_amount"
     ];
 
     public function user(): BelongsTo
@@ -29,10 +32,10 @@ class Order extends Model
     }
     public function coupon()
     {
-        return $this->hasOne(Coupon::class);
+        return $this->belongsTo(Coupon::class,'coupon_id');
     }
-    public function orderItems()
+    public function items()
     {
-        return $this->hasMany(Orderitem::class);
+        return $this->hasMany(OrderItem::class);
     }
 }

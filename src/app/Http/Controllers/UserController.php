@@ -31,6 +31,7 @@ class UserController extends Controller
         if (!$user) {
             return response()->json(["error" => "Usuário não autenticado"], 401);
         }
+        
         auth()->logout();
         User::where('id', $user->id)->delete();
 

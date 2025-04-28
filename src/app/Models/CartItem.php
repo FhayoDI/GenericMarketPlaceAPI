@@ -21,7 +21,18 @@ class CartItem extends Model
     public function cart() : BelongsTo {
         return $this->belongsTo(Cart::class);
     }
-    public function product() : HasOne {
-        return $this->hasOne(Products::class);
+    public function product() : BelongsTo {
+        return $this->belongsTo(Products::class);
     }
+    public function decreaseQuantity(int $quantity = 1)
+{
+    if ($this->quantity > $quantity) {
+        $this->decrement('quantity', $quantity);
+        return $quantity;
+    }
+    
+    $deleted = $this->quantity;
+    $this->delete();
+    return $deleted; 
+}
 }

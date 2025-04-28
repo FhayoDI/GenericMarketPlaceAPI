@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Products;
 use Illuminate\Http\Request;
@@ -48,23 +49,21 @@ class CartItemController extends Controller
         ]);
     }
 
-    public function destroy(CartItem $cartItem)
+    public function destroy(Cart $cart, Products $product, Request $request)
     {
-        $cartItem->delete();
-    }
-    public function update(Request $request, CartItem $cartItem)
-    {
-        $userData = $request->validate([
-            "product_id" => "required|exists:products,id",
-            "quantity" => "required|numeric|min:1",
+        $request->validate([
+            'quantity' => 'nullable|integer|min:1'
         ]);
-        if ($request->quantity == 0) {
-            $cartItem->delete();
-        }
-        $cartItem->update($userData);
+    
+        $item = $cart->items()->where('product_id', $product->id)->firstOrFail();
+        
+        $quantityToRemove = $request->input('quantity', $item->quantity); 
+        $removedQuantity = $item->decreaseQuantity($quantityToRemove);
+    
         return response()->json([
-            "message" => "Item atualizado com sucesso!",
-            "cartItem" => $cartItem,
+            'success' => true,
+            'message' => "{$removedQuantity} itens removidos do carrinho",
+            'remaining_quantity' => optional($item->fresh())->quantity ?? 0
         ]);
     }
 }

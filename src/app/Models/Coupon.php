@@ -22,12 +22,16 @@ class Coupon extends Model
 
     public function isValid()
     {
-    
-        $notExpired = $this->expires_at === null || $this->expires_at instanceof Carbon && $this->expires_at->isFuture();
-        
-    
-        $withinUsageLimit = $this->usage_limit === null || $this->used < $this->usage_limit;
-        
+        $notExpired = true;
+        if ($this->expires_at !== null) {
+            if (!$this->expires_at instanceof Carbon) {
+                $this->expires_at = Carbon::parse($this->expires_at);
+            }
+            $notExpired = $this->expires_at->isFuture();
+        }
+
+        $withinUsageLimit = ($this->usage_limit === null) || ($this->used < $this->usage_limit);
+
         return $notExpired && $withinUsageLimit;
     }
 
