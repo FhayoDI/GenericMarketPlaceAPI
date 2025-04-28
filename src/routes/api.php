@@ -15,6 +15,7 @@ use App\Http\Controllers\{
 };
 
 /* Rotas Públicas */
+
 Route::post('/registrar', [LoginController::class, 'registration']);
 Route::post('/entrar', [LoginController::class, 'login']);
 
@@ -27,7 +28,7 @@ Route::get('/produtos/{product}', [ProductsController::class, 'show']);
 
 /* Rotas Autenticadas */
 Route::middleware(['auth:sanctum'])->group(function () {
-    
+
     // Usuário
     Route::prefix('/usuario')->group(function () {
         Route::get('/', [UserController::class, 'returnUser']);      // GET /usuario
@@ -39,18 +40,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Carrinho
     Route::prefix('/carrinho')->group(function () {
         Route::get('/', [CartController::class, 'index']);              // GET /carrinho
-        Route::post('/itens', [CartItemController::class, 'store']);// POST /carrinho/itens
+        Route::post('/itens', [CartItemController::class, 'store']); // POST /carrinho/itens
         Route::delete('/itens/{product}', [CartItemController::class, 'destroy']); // DELETE /carrinho/itens/{produto}
     });
 
     // Endereços
-    Route::apiResource('/enderecos', UserAdressController::class)
-        ->names([
-            'index' => 'enderecos.meu',
-            'adress' => 'enderecos.criar',
-            'update' => 'enderecos.atualizar',
-            'destroy' => 'enderecos.excluir'
-        ]);
+    // Listar endereços
+    Route::get('/enderecos/meu', [UserAdressController::class, 'index']);
+
+    // Criar endereço
+    Route::post('/enderecos/criar', [UserAdressController::class, 'adress']);
+
+    // Atualizar endereço
+    Route::put('/enderecos/atualizar/{userAdress}', [UserAdressController::class, 'update']);
+
+    // Excluir endereço
+    Route::delete('/enderecos/{endereco}', [UserAdressController::class, 'destroy'])
+        ->name('enderecos.excluir');
 
     // Pedidos
     Route::post('/pedidos', [OrderController::class, 'store']);            // POST /pedidos
@@ -80,7 +86,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Produtos
         Route::post('/produtos', [ProductsController::class, 'store']);              // POST /produtos
-        Route::delete('/produtos/{product}', [ProductsController::class, 'destroy']);// DELETE /produtos/{produto}
+        Route::delete('/produtos/{product}', [ProductsController::class, 'destroy']); // DELETE /produtos/{produto}
 
         // Cupons
         Route::post('/cupons', [CouponController::class, 'store']);                  // POST /cupons

@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CartItemController extends Controller
 {
@@ -51,15 +52,25 @@ class CartItemController extends Controller
 
     public function destroy(Cart $cart, Products $product, Request $request)
     {
+        $user = Auth::user();
+        $cart = $user->cart;
+        if(!$cart){
+            return response()->json([
+                "message" => "O carrinho nao existe!"
+            ], 404);
+        }
         $request->validate([
             'quantity' => 'nullable|integer|min:1'
         ]);
-    
-        $item = $cart->items()->where('product_id', $product->id)->firstOrFail();
+        $item = $cart->cartItems()->where('product_id', $product->id)->first();
         
+        if(!$item){
+            return response()->json([
+                "message" => "Item não encontrado no carrinho!"
+            ], 404);
+        }
         $quantityToRemove = $request->input('quantity', $item->quantity); 
         $removedQuantity = $item->decreaseQuantity($quantityToRemove);
-    
         return response()->json([
             'success' => true,
             'message' => "{$removedQuantity} itens removidos do carrinho",
