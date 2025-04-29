@@ -38,7 +38,7 @@ class ProductsController extends Controller
             "product" => [
                 "name" => $product->name,
                 "stock" => $product->stock,
-                "price" => $product->price
+                "price" => $product->price,
             ],
         ], 200);
     }

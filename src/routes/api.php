@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
+    ProductImageController,
     LoginController,
     CartController,
     CartItemController,
@@ -44,14 +45,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/itens', [CartItemController::class, 'store']); 
         Route::delete('/itens/{product}', [CartItemController::class, 'destroy']); 
     });
-
+    
     // Endereços
     // Listar endereços
     Route::get('/enderecos/meu', [UserAdressController::class, 'index']);
-
+    
     // Criar endereço
     Route::post('/enderecos/criar', [UserAdressController::class, 'adress']);
-
+    
     // Atualizar endereço
     Route::put('/enderecos/atualizar/{userAdress}', [UserAdressController::class, 'update']);
     
@@ -73,7 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/categorias/{id}', [CategoryController::class, 'delete']); 
 
         // Produtos
-        Route::put('/produtos/{product}', [ProductsController::class, 'update']);
+        Route::put('/produtos', [ProductsController::class, 'update']);
 
         // Pedidos
         Route::put('/pedidos/{order}', [OrderController::class, 'update']);   
