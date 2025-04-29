@@ -17,8 +17,8 @@ class ProductsController extends Controller
         $validatedData = $request->validate([
             'category_id' => 'required|integer|exists:categories,id',
             'name' => 'required|string',
-            'stock' => 'required|integer',
-            'price' => 'required|numeric',
+            'stock' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:1',
             'description' => 'nullable|string',
         ]);
 

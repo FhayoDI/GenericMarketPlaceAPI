@@ -13,6 +13,20 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    public function orderAllAdmin()
+    {
+        return response()->json([
+            "message" => "Todos os   pedidos:",
+            "order" => Order::all(),
+        ]);
+    }
+    public function orderAllAdminActive(Order $order)
+    {   
+        return response()->json([
+            "message" => "Pedidos ativos:",
+            "order" => Order::where('status', '!=', "COMPLETED")->get()
+        ]);
+    }
     public function index()
     {
         return response()->json([
@@ -20,7 +34,15 @@ class OrderController extends Controller
             "orders" => Order::with(['items.product', 'coupon'])->where('user_id', auth()->id())->latest()->get(),
         ]);
     }
-
+    public function indexOpen(Order $order)
+    {
+        if ($order->status !== ["COMPLETED"]) {
+            return response()->json([
+                "message" => "Seus pedidos ativos:",
+                "order" => Order::where('user_id', auth()->id())->where('status', '!=', 'COMPLETED')->latest()->get(),
+            ]);
+        }
+    }
 
     public function show(Order $order)
     {
@@ -100,7 +122,6 @@ class OrderController extends Controller
                 'coupon_id' => $coupon?->id,
                 'status' => 'PENDING',
                 'subtotal' => $subtotal,
-                'products_discount' => 0, // Campo mantido mas zerado
                 'coupon_discount' => $couponDiscount,
                 'total_amount' => $totalAmount
             ]);
@@ -111,7 +132,6 @@ class OrderController extends Controller
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
                     'unit_price' => $item->product->price,
-                    'applied_discount' => 0 // Campo preenchido com zero
                 ]);
                 $product = Products::find($item->product_id);
                 $product->stock -= $item->quantity;
@@ -145,7 +165,13 @@ class OrderController extends Controller
                 "message" => "Não é possível alterar pedidos completados!"
             ], 403);
         }
-
+        if ($validated['status'] === "COMPLETED") {
+            return response()->json([
+                "message" => "Pedido entregue com sucesso!!,
+                Este pedido já não pode ser alterado!",
+                $order->update($validated),
+            ]);
+        }
         $order->update($validated);
 
         return response()->json([
@@ -154,7 +180,12 @@ class OrderController extends Controller
         ]);
     }
 
-
+public function orderSituation(Order $order){
+    return response()->json([
+        "message" => "Situação do pedido",
+        "order" => $order->status,
+    ]);
+}
     public function destroy(Order $order)
     {
         $this->authorize('delete', $order);

@@ -32,8 +32,8 @@ class UserController extends Controller
             return response()->json(["error" => "Usuário não autenticado"], 401);
         }
         
-        auth()->logout();
-        User::where('id', $user->id)->delete();
+        $user->currentAccessToken()->delete();
+        User::where('id',  $user->id)->delete();
 
         return response()->json([
             "message" => "Usuário deletado com sucesso!",

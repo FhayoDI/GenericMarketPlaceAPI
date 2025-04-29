@@ -22,6 +22,6 @@ class CartController extends Controller
     }
     public function adminIndex(User $user)
     {
-        return $user->cart()->with('items')->first();
+        return $user->cart()->with('CartItems')->first();
     }
 }

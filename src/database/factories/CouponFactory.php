@@ -11,7 +11,7 @@ class CouponFactory extends Factory
         return [
             'code' => 'CUPOM-' . $this->faker->unique()->numberBetween(1000, 9999),
             'type' => 'percentage',
-            'value' => $this->faker->numberBetween(5, 30), // 5% a 30%
+            'value' => $this->faker->numberBetween(5, 30), 
             'expires_at' => $this->faker->dateTimeBetween('now', '+1 year'),
             'usage_limit' => $this->faker->numberBetween(50, 200),
             'used' => 0,

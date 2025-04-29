@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignId('coupon_id')->nullable()->constrained()->onDelete('set null');
             $table->enum('status', ['PENDING','PROCESSING','SHIPPED','COMPLETED','CANCELED'])->default('PENDING');
             $table->decimal('subtotal', 10, 2);
-            $table->decimal('products_discount', 10, 2)->default(0); // Soma dos descontos de produtos
-            $table->decimal('coupon_discount', 10, 2)->default(0); // Desconto do cupom
+            $table->decimal('products_discount', 10, 2)->default(0); 
+            $table->decimal('coupon_discount', 10, 2)->default(0); 
             $table->decimal('total_amount', 10, 2);
             $table->timestamps();
         });

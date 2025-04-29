@@ -27,20 +27,12 @@ class CartItemController extends Controller
         }
 
         $unit_price = $product->price;
-       // $discount = 0;
-        
-      //  if ($product->discount) {
-        //    $discount = $product->discount;
-          //  $unit_price = $product->price - $discount;
-        //}
-        
+
         $cartItem = CartItem::create([
             "product_id" => $validatedData["product_id"],
             "quantity" => $validatedData["quantity"],
             "unit_price" => $unit_price,
-      //      "discount" => $discount, 
             "cart_id" => $cart->id,
-           // "name" => $product->name, 
         ]);
 
         return response()->json([

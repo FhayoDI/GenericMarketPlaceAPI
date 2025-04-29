@@ -21,11 +21,7 @@ class Products extends Model
     }
     public function order(){
         return $this->hasMany(Order::class);
-    }
-    public function discount() 
-    {
-        return $this->hasMany(Discounts::class); 
-    }
+    }    
     public function cartItem()
     {
         return $this->hasMany(CartItem::class);

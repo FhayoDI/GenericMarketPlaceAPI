@@ -12,7 +12,7 @@ class ProductsFactory extends Factory
             'name' => $this->faker->word(),
             'description' => $this->faker->sentence(),
             'price' => $this->faker->randomFloat(2, 10, 500),
-            'stock' => $this->faker->numberBetween(10, 100), // 🔥 Adicionando stock aqui
+            'stock' => $this->faker->numberBetween(10, 100), 
             'category_id' => \App\Models\Category::factory(),
         ];
     }

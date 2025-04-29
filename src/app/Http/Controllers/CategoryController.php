@@ -13,12 +13,22 @@ class CategoryController extends Controller
          Category::with('products')->get(),
       ]);
    }
-
+   public function seeCategory(Category $category){
+      if (!$category){
+         return response()->json([
+            "message" => "categoria não encontrada!"
+         ], 404);
+      }
+      return response()->json([
+         "message"=>"categoria encontrada!",
+         "category" => $category
+      ],200);
+   }
    public function  store(Request $request)
    {
       $request->validate([
          "name" => "required|string",
-         "description" => "required|string",
+         "description" => "string",
       ]);
       $category = Category::create($request->all());
       return response()->json([
@@ -28,7 +38,7 @@ class CategoryController extends Controller
    }
    public function update(Request $request, $id)
    {
-      if (!$request->has(['name', 'description'])) {
+      if (!$request->has(['name'])) {
          return response()->json([
             "message" => "Dados incompletos! Envie name e description",
             "received_data" => $request->all() 
@@ -37,7 +47,7 @@ class CategoryController extends Controller
 
       $validated = $request->validate([
          "name" => "required|string|max:255",
-         "description" => "required|string"
+         "description" => "string"
       ]);
 
       $category = Category::find($id);

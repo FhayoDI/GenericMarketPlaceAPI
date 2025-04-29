@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Coupon;
+use App\Models\Discounts;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Products;
@@ -17,6 +18,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
+
         User::firstOrCreate(
             ['email' => 'admin@admin.com'],
             [
@@ -31,7 +33,7 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         User::factory()->count(10)
-            ->has(UserAdress::factory()->count(count: 1), 'UserAdress') // Certificando-se de criar 1 endereço por usuário
+            ->has(UserAdress::factory()->count(count: 1), 'UserAdress') 
             ->has(Cart::factory(), 'cart')
             ->create();
 
@@ -57,7 +59,7 @@ class DatabaseSeeder extends Seeder
 
             $order = Order::create([
                 'user_id' => $cart->user_id,
-                'address_id' => $cart->user->user_adresses->first()->id, // Garantindo que o primeiro endereço é usado
+                'address_id' => $cart->user->user_adresses->first()->id, 
                 'order_date' => now(),
                 'status' => 'PENDING',
                 'coupon_id' => $coupon?->id,

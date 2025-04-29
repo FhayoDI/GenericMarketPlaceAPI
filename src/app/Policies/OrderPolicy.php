@@ -11,6 +11,11 @@ class OrderPolicy
     /**
      * Determine whether the user can view any models.
      */
+    public function orderAllAdmin(User $user, Order $order):bool
+    {
+        return $user->id === $order->user_id;
+    }
+
     public function viewAny(User $user): bool
     {
         //
@@ -37,12 +42,10 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        //
+        return $user->id === $order->user_id;   
+
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Order $order): bool
     {
         return $user->id === $order->user_id;

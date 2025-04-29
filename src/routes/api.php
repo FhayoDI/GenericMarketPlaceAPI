@@ -21,6 +21,7 @@ Route::post('/entrar', [LoginController::class, 'login']);
 
 // Catálogo
 Route::get('/categorias', [CategoryController::class, 'index']);
+Route::get('/categorias/{category}', [CategoryController::class, 'seeCategory']);
 Route::get('/cupons', [CouponController::class, 'index']);
 Route::post('/cupons/validar', [CouponController::class, 'check']);
 Route::get('/produtos', [ProductsController::class, 'index']);
@@ -31,17 +32,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Usuário
     Route::prefix('/usuario')->group(function () {
-        Route::get('/', [UserController::class, 'returnUser']);      // GET /usuario
-        Route::delete('/', [UserController::class, 'delete']);     // DELETE /usuario
-        Route::put('/', [UserController::class, 'update']);           // PUT /usuario
-        Route::post('/sair', [LoginController::class, 'logoutin']);           // POST /usuario/sair
+        Route::get('/', [UserController::class, 'returnUser']);    
+        Route::delete('/', [UserController::class, 'delete']);     
+        Route::put('/', [UserController::class, 'update']);          
+        Route::post('/sair', [LoginController::class, 'logoutin']);  
     });
 
     // Carrinho
     Route::prefix('/carrinho')->group(function () {
-        Route::get('/', [CartController::class, 'index']);              // GET /carrinho
-        Route::post('/itens', [CartItemController::class, 'store']); // POST /carrinho/itens
-        Route::delete('/itens/{product}', [CartItemController::class, 'destroy']); // DELETE /carrinho/itens/{produto}
+        Route::get('/', [CartController::class, 'index']);           
+        Route::post('/itens', [CartItemController::class, 'store']); 
+        Route::delete('/itens/{product}', [CartItemController::class, 'destroy']); 
     });
 
     // Endereços
@@ -53,52 +54,55 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Atualizar endereço
     Route::put('/enderecos/atualizar/{userAdress}', [UserAdressController::class, 'update']);
-
+    
     // Excluir endereço
     Route::delete('/enderecos/{endereco}', [UserAdressController::class, 'destroy'])
         ->name('enderecos.excluir');
 
-    // Pedidos
-    Route::post('/pedidos', [OrderController::class, 'store']);            // POST /pedidos
-    Route::get('/pedidos', [OrderController::class, 'index']);             // GET /pedidos
-    Route::get('/pedidos/{order}', [OrderController::class, 'show']);  // GET /pedidos/{pedido}
+    // Pedidos - Importante: rotas específicas antes das genéricas
+    Route::get('/pedidos/ativos', [OrderController::class, 'indexOpen']);  
+    Route::post('/pedidos', [OrderController::class, 'store']);            
+    Route::get('/pedidos', [OrderController::class, 'index']);             
+    Route::get('/pedidos/{order}', [OrderController::class, 'show']);     
 
     /* Rotas de Moderador */
-    Route::middleware(['moderador'])->group(function () {
+    Route::middleware(['is_moderator'])->group(function () {
         // Categorias
-        Route::post('/categorias', [CategoryController::class, 'store']);          // POST /categorias
-        Route::put('/categorias/{id}', [CategoryController::class, 'update']); // PUT /categorias/{categoria}
-        Route::delete('/categorias/{id}', [CategoryController::class, 'delete']); // DELETE /categorias/{categoria}
+        Route::post('/categorias', [CategoryController::class, 'store']);         
+        Route::put('/categorias/{id}', [CategoryController::class, 'update']); 
+        Route::delete('/categorias/{id}', [CategoryController::class, 'delete']); 
 
         // Produtos
-        Route::put('/produtos/{product}', [ProductsController::class, 'update']); // PUT /produtos/{produto}
+        Route::put('/produtos/{product}', [ProductsController::class, 'update']);
 
         // Pedidos
-        Route::put('/pedidos/{order}', [OrderController::class, 'update']);    // PUT /pedidos/{pedido}
+        Route::put('/pedidos/{order}', [OrderController::class, 'update']);   
     });
-
+    
     /* Rotas de Administrador */
-    Route::middleware(['admin'])->group(function () {
+    Route::middleware(['is_admin'])->group(function () {
         // Usuários
-        Route::get('/usuarios', [UserController::class, 'index']);               // GET /usuarios
-        Route::post('/usuarios', action: [UserController::class, 'create']);              // POST /usuarios
-        Route::put('/usuario/permissoes', [UserController::class, 'setModerator']); // PUT /usuarios/{usuario}/permissoes
+        Route::get('/usuarios', [UserController::class, 'index']);               
+        Route::post('/usuarios', action: [UserController::class, 'create']);              
+        Route::put('/usuario/permissoes', [UserController::class, 'setModerator']); 
 
         // Produtos
-        Route::post('/produtos', [ProductsController::class, 'store']);              // POST /produtos
-        Route::delete('/produtos/{product}', [ProductsController::class, 'destroy']); // DELETE /produtos/{produto}
-
+        Route::post('/produtos', [ProductsController::class, 'store']);              
+        Route::delete('/produtos/{product}', [ProductsController::class, 'destroy']); 
+        
         // Cupons
-        Route::post('/cupons', [CouponController::class, 'store']);                  // POST /cupons
-        Route::delete('/cupons/{coupon}', [CouponController::class, 'destroy']);      // DELETE /cupons/{cupom}
+        Route::post('/cupons', [CouponController::class, 'store']);                  
+        Route::delete('/cupons/{coupon}', [CouponController::class, 'destroy']);     
 
         // Descontos
-        Route::post('/descontos', [DiscountsController::class, 'store']);            // POST /descontos
-        Route::put('/descontos/{discounts}', [DiscountsController::class, 'update']); // PUT /descontos/{desconto}
-        Route::delete('/descontos/{discounts}', [DiscountsController::class, 'destroy']); // DELETE /descontos/{desconto}
+        Route::post('/descontos', [DiscountsController::class, 'store']);            
+        Route::put('/descontos/{discounts}', [DiscountsController::class, 'update']); 
+        Route::delete('/descontos/{discounts}', [DiscountsController::class, 'destroy']); 
 
-        // Acesso administrativo
-        Route::get('/admin/carrinhos/{user}', [CartController::class, 'adminIndex']); // GET /admin/carrinhos/{usuario}
-        Route::delete('/pedidos/{order}', [OrderController::class, 'destroy']);   // DELETE /pedidos/{pedido}
+        // Acesso administrativo 
+        Route::get('/admin/carrinhos/{user}', [CartController::class, 'adminIndex']); 
+        Route::get('/pedidos/adm/ativos', [OrderController::class, 'orderAllAdminActive']); 
+        Route::delete('/pedidos/deletar/adm/{order}', [OrderController::class, 'destroy']);   
+        Route::get('/pedidos/', [OrderController::class, 'orderAllAdmin']);      
     });
 });
