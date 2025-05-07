@@ -51,8 +51,7 @@ class UserAdressController extends Controller
         ]);
 
         $adress = UserAdress::where('id', $userAdress->id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
+            ->where('user_id', $user->id)->firstOrFail();
         if (!$adress) {
             return response()->json([
                 "message" => "Não foi possível atualizar o endereço!"

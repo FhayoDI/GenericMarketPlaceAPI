@@ -113,7 +113,7 @@ class OrderController extends Controller
                 $couponDiscount = min($couponDiscount, $subtotal);
             }
 
-            $totalAmount = $subtotal - $couponDiscount;
+            $totalAmount = $subtotal - $couponDiscount; 
 
             $order = Order::create([
                 'user_id' => $user->id,
@@ -123,7 +123,7 @@ class OrderController extends Controller
                 'status' => 'PENDING',
                 'subtotal' => $subtotal,
                 'coupon_discount' => $couponDiscount,
-                'total_amount' => $totalAmount
+                'total_amount' => $totalAmount,
             ]);
 
             foreach ($cart->cartItems as $item) {
@@ -180,12 +180,6 @@ class OrderController extends Controller
         ]);
     }
 
-public function orderSituation(Order $order){
-    return response()->json([
-        "message" => "Situação do pedido",
-        "order" => $order->status,
-    ]);
-}
     public function destroy(Order $order)
     {
         $this->authorize('delete', $order);
