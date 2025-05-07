@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
-    ProductImageController,
     LoginController,
     CartController,
     CartItemController,
@@ -94,11 +93,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Cupons
         Route::post('/cupons', [CouponController::class, 'store']);                  
         Route::delete('/cupons/{coupon}', [CouponController::class, 'destroy']);     
-
-        // Descontos
-        Route::post('/descontos', [DiscountsController::class, 'store']);            
-        Route::put('/descontos/{discounts}', [DiscountsController::class, 'update']); 
-        Route::delete('/descontos/{discounts}', [DiscountsController::class, 'destroy']); 
 
         // Acesso administrativo 
         Route::get('/admin/carrinhos/{user}', [CartController::class, 'adminIndex']); 

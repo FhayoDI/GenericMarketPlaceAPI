@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Coupon;
-use App\Models\Discounts;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Products;

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Cart;
 use App\Models\Products;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,7 +16,7 @@ class CartItemFactory extends Factory
         $quantity = rand(1, 5);
         
         return [
-            'cart_id' => \App\Models\Cart::factory(),
+            'cart_id' => Cart::factory(),
             'product_id' => $product->id,
             'quantity' => $quantity,
             'unit_price' => $product->price, 
